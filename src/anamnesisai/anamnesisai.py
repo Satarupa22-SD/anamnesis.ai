@@ -33,8 +33,8 @@ def db_chain():
     llm = OpenAI(openai_api_key=os.environ["API_KEY"], temperature=0.7)
 
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
-    to_vectorize = [" ".join(example.values()) for example in few_shots]
-    vectorstore = Chroma.from_texts(to_vectorize, embeddings, metadatas=few_shots)
+    to_vectorize = [" ".join(example.values()) for example in database]
+    vectorstore = Chroma.from_texts(to_vectorize, embeddings, metadatas=database) # need to create a database file to share the format of sql database
     example_selector = SemanticSimilarityExampleSelector(
         vectorstore=vectorstore,
         k=2,
