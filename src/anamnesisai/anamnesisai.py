@@ -9,11 +9,18 @@ from langchain.prompts import FewShotPromptTemplate
 from langchain.chains.sql_database.prompt import PROMPT_SUFFIX, _mysql_prompt
 from langchain.prompts.prompt import PromptTemplate
 
-from few_shots import few_shots
+
 import getpass
 import os
 # from dotenv import load_dotenv
 # load_dotenv()  
+
+
+import json
+
+
+with open("resource_templates.json", "r") as f:
+    resource_templates = json.load(f)
 
 def db_chain():
     db_user = "root"
@@ -41,21 +48,15 @@ def db_chain():
     Observation: Record the patient's reported symptoms and the physical exam findings.
 
     Use clear and concise language for each resource. Maintain patient confidentiality and adhere to HIPAA regulations. Strive for accuracy and consistency in your FHIR structures.
-    
+    resource_template = resource_templates["resource"]
     No pre-amble.
     """
 
-    example_prompt = PromptTemplate(
-        input_variables=["Conversation",],
-        template="\nConversation: {Conversation}\nFhir: {Resource}",
-    )
+   example_prompt = PromptTemplate(
+    input_variables=["Conversation"],
+    template="\nConversation: {Conversation}\nFhir: {Resource}\nResource Template: {ResourceTemplate}",
+)
 
-    few_shot_prompt = FewShotPromptTemplate(
-        example_selector=example_selector,
-        example_prompt=example_prompt,
-        prefix=mysql_prompt,
-        suffix=PROMPT_SUFFIX,
-        input_variables=["Conversation"], 
-    )
+    
     chain = SQLDatabaseChain.from_llm(llm, db, verbose=True, prompt=few_shot_prompt)
     return chain
